@@ -1,0 +1,3 @@
+{
+  "ignore": ["husky", "auth_info_baileys", "node_modules", "dist", "build"]
+}
