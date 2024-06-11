@@ -1,7 +1,8 @@
 import "./config/env";
+import { connectToWhatsApp } from "./config/whatsapp";
 
-export function bootstrap() {
-  console.log("Hello World!");
+export async function bootstrap() {
+  await connectToWhatsApp();
 }
 
 bootstrap();
