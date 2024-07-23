@@ -2,7 +2,7 @@
   "author": "Edgar Benavides",
   "dependencies": {
     "@hapi/boom": "10.0.1",
-    "@whiskeysockets/baileys": "6.7.4",
+    "@whiskeysockets/baileys": "6.7.5",
     "dotenv": "16.4.5",
     "link-preview-js": "3.0.5",
     "qrcode-terminal": "0.12.0"
@@ -49,7 +49,7 @@
     "lint": "eslint src",
     "local": "ts-node src",
     "prepare": "husky",
-    "start": "node src",
+    "start": "node dist/src/index.js",
     "test": "jest"
   },
   "version": "1.0.0"
