@@ -42,7 +42,7 @@
   "name": "whatsapp-gemini",
   "scripts": {
     "build": "npm-run-all format lint clean && tsc",
-    "clean": "rimraf ./build ./auth_info_baileys",
+    "clean": "rimraf ./dist ./auth_info_baileys",
     "dev": "nodemon src -e ts,json --exec 'npm run local'",
     "format": "npx prettier --write src",
     "format:check": "npx prettier --check src",
