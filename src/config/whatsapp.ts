@@ -6,12 +6,13 @@ import makeWASocket, {
   fetchLatestBaileysVersion,
   useMultiFileAuthState,
 } from "@whiskeysockets/baileys";
+// import fs from "fs";
 
 export async function connectToWhatsApp() {
   const { version, isLatest } = await fetchLatestBaileysVersion();
 
-  console.log(`using WhatsApp Web v${version.join(".")}`);
-  console.log(`latest version: ${isLatest ? "yes" : "no"}`);
+  console.log(`Using WhatsApp Web v${version.join(".")}`);
+  console.log(`Latest version: ${isLatest ? "yes" : "no"}`);
 
   const { state, saveCreds } = await useMultiFileAuthState("auth_info_baileys");
 
@@ -56,7 +57,7 @@ export async function connectToWhatsApp() {
   });
 
   sock.ev.on("messages.upsert", async (msg) => {
-    if (!msg.messages.length || msg.type !== "notify") return;
+    if (!msg.messages.length) return;
 
     const messageContent = msg.messages[0];
 
@@ -66,16 +67,16 @@ export async function connectToWhatsApp() {
 
     if (fromMe || !remoteJid || remoteJid === "status@broadcast") return;
 
+    console.log(JSON.stringify(msg, null, 2));
+
     const { pushName, message } = messageContent;
 
     if (!message || !pushName) return;
 
     const messageText =
-      message.conversation?.trim() || message.extendedTextMessage?.text;
+      message.conversation?.trim() || message.extendedTextMessage?.text?.trim();
 
     if (!messageText) return;
-
-    console.log({ remoteJid, pushName, messageText });
 
     if (
       messageText.includes(
@@ -83,12 +84,32 @@ export async function connectToWhatsApp() {
       )
     ) {
       const response = `¡Hola! *${pushName}* 😊\n\n¡Muchas gracias por confirmar tu asistencia! Nos alegra mucho saber que nos acompañarán en este día tan especial.\n\nPara asegurarnos de tener todo listo, ¿Nos podrías confirmar tu nombre? Y de acuerdo a tus pases ¿Cuántas personas asistirán?\n\nDetalles del evento:\n\n- Ceremonia: Templo de San Agustín, 5:00 p.m.\n- Recepción: La Huerta, a partir de las 6:00 p.m.\n\n¡Gracias de nuevo por tu confirmación y nos vemos pronto!\n\nAquí está el enlace a la invitación digital: https://boda.edgarbenavides.dev/invitacion\n\nSaludos,\nLizbeth y Edgar.`;
-      await sock.sendMessage(remoteJid, {
-        text: response,
-      });
+      await sock.sendMessage(
+        remoteJid,
+        {
+          text: response,
+        },
+        {
+          quoted: messageContent,
+        },
+      );
 
       return;
     }
+
+    /* if (remoteJid === "120363243519132791@g.us") {
+      await sock.sendMessage(
+        remoteJid,
+        {
+          sticker: fs.readFileSync("cat.webp"),
+        },
+        {
+          quoted: messageContent,
+        },
+      );
+
+      return;
+    } */
 
     /* if (
       containsAnyWord(messageText, [
