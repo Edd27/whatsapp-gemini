@@ -26,7 +26,7 @@ export async function connectToWhatsApp() {
 
   sock.ev.on("creds.update", saveCreds);
 
-  sock.ev.on("connection.update", (update) => {
+  sock.ev.on("connection.update", async (update) => {
     const { connection, lastDisconnect } = update;
 
     if (connection === "close") {
@@ -53,6 +53,10 @@ export async function connectToWhatsApp() {
       } else {
         sock.end(lastDisconnect?.error);
       }
+    }
+
+    if (connection === "open") {
+      await sock.sendPresenceUpdate("unavailable");
     }
   });
 
