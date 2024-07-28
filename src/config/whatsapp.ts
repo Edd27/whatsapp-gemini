@@ -25,10 +25,6 @@ export async function connectToWhatsApp() {
 
   sock.ev.on("creds.update", saveCreds);
 
-  sock.ev.on("presence.update", (presence) => {
-    console.log("Current presence:", { presence });
-  });
-
   sock.ev.on("connection.update", async (update) => {
     const { connection, lastDisconnect } = update;
 
@@ -77,8 +73,6 @@ export async function connectToWhatsApp() {
       return;
     }
 
-    console.log(JSON.stringify(msg, null, 2));
-
     const { pushName, message } = messageContent;
 
     if (!message || !pushName) return;
@@ -87,6 +81,24 @@ export async function connectToWhatsApp() {
       message.conversation?.trim() || message.extendedTextMessage?.text?.trim();
 
     if (!messageText) return;
+
+    console.log(JSON.stringify(messageContent, null, 2));
+
+    console.log({
+      contact: {
+        phoneNumber: remoteJid,
+        name: pushName,
+      },
+      message: {
+        text: messageText,
+        replyingTo: {
+          participant: message.extendedTextMessage?.contextInfo?.participant,
+          message:
+            message.extendedTextMessage?.contextInfo?.quotedMessage
+              ?.conversation,
+        },
+      },
+    });
 
     if (
       messageText.includes(
