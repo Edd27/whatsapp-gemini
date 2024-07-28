@@ -82,7 +82,7 @@ export async function connectToWhatsApp() {
 
     if (!messageText) return;
 
-    console.log(JSON.stringify(messageContent, null, 2));
+    // console.log(JSON.stringify(messageContent, null, 2));
 
     console.log({
       contact: {
