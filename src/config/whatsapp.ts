@@ -6,7 +6,6 @@ import makeWASocket, {
   fetchLatestBaileysVersion,
   useMultiFileAuthState,
 } from "@whiskeysockets/baileys";
-// import fs from "fs";
 
 export async function connectToWhatsApp() {
   const { version, isLatest } = await fetchLatestBaileysVersion();
@@ -25,6 +24,10 @@ export async function connectToWhatsApp() {
   });
 
   sock.ev.on("creds.update", saveCreds);
+
+  sock.ev.on("presence.update", (presence) => {
+    console.log("Current presence:", { presence });
+  });
 
   sock.ev.on("connection.update", async (update) => {
     const { connection, lastDisconnect } = update;
@@ -69,7 +72,10 @@ export async function connectToWhatsApp() {
 
     const { remoteJid, fromMe } = messageContent.key;
 
-    if (fromMe || !remoteJid || remoteJid === "status@broadcast") return;
+    if (fromMe || !remoteJid || remoteJid === "status@broadcast") {
+      await sock.sendPresenceUpdate("unavailable");
+      return;
+    }
 
     console.log(JSON.stringify(msg, null, 2));
 
@@ -100,20 +106,6 @@ export async function connectToWhatsApp() {
 
       return;
     }
-
-    /* if (remoteJid === "120363243519132791@g.us") {
-      await sock.sendMessage(
-        remoteJid,
-        {
-          sticker: fs.readFileSync("cat.webp"),
-        },
-        {
-          quoted: messageContent,
-        },
-      );
-
-      return;
-    } */
 
     /* if (
       containsAnyWord(messageText, [
