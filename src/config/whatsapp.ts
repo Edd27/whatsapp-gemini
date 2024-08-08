@@ -82,23 +82,15 @@ export async function connectToWhatsApp() {
 
     if (!messageText) return;
 
+    console.log("=".repeat(100));
+
     // console.log(JSON.stringify(messageContent, null, 2));
 
-    console.log({
-      contact: {
-        phoneNumber: remoteJid,
-        name: pushName,
-      },
-      message: {
-        text: messageText,
-        replyingTo: {
-          participant: message.extendedTextMessage?.contextInfo?.participant,
-          message:
-            message.extendedTextMessage?.contextInfo?.quotedMessage
-              ?.conversation,
-        },
-      },
-    });
+    console.log(`📱`, remoteJid);
+    console.log(`🐵`, pushName);
+    console.log(`💬`, messageText);
+
+    console.log("=".repeat(100), "\n");
 
     if (
       messageText.includes(
