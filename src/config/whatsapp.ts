@@ -50,7 +50,8 @@ export async function connectToWhatsApp() {
         console.log("Connection TimedOut, Reconnecting...");
         connectToWhatsApp();
       } else {
-        sock.end(lastDisconnect?.error);
+        connectToWhatsApp();
+        //sock.end(lastDisconnect?.error);
       }
     }
 
