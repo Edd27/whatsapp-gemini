@@ -94,6 +94,16 @@ export async function connectToWhatsApp() {
     console.log("=".repeat(100), "\n");
 
     if (
+      [
+        "5214451009291@s.whatsapp.net",
+        "5214454504107@s.whatsapp.net",
+        "5214451086187@s.whatsapp.net",
+      ].includes(remoteJid)
+    ) {
+      return;
+    }
+
+    if (
       containsAnyWord(messageText, [
         "hello",
         "hi",
