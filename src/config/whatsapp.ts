@@ -6,11 +6,8 @@ import makeWASocket, {
   fetchLatestBaileysVersion,
   useMultiFileAuthState,
 } from "@whiskeysockets/baileys";
-import {
-  containsAnyWord,
-  generateAnswerWithBotion,
-  generateAnswerWithGemini,
-} from "../utils";
+import { ChatBot } from "../types";
+import { generateAnswerWithBotion, generateAnswerWithGemini } from "../utils";
 
 export async function connectToWhatsApp() {
   const { version, isLatest } = await fetchLatestBaileysVersion();
@@ -103,24 +100,28 @@ export async function connectToWhatsApp() {
       return;
     }
 
-    if (
-      containsAnyWord(messageText, [
-        "hello",
-        "hi",
-        "hola",
-        "buenas tardes",
-        "buenos dias",
-        "buenas noches",
-      ])
-    ) {
-      await sock.sendMessage(remoteJid, {
-        text: `Hola! ${pushName}, un gusto saludarte.\n¿en que te puedo ayudar?`,
-      });
+    const provider = process.env.CHATBOT_PROVIDER?.toLowerCase() || "botion";
 
+    if (!["botion", "gemini"].includes(provider)) {
       return;
     }
 
-    const provider = process.env.CHATBOT_PROVIDER?.toLowerCase() || "botion";
+    const chatBot: ChatBot = await fetch(
+      `https://botion.edgarbenavides.dev/api/chat-bots/${process.env.BOTION_CHATBOT_ID}/about`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "api-key": `${process.env.BOTION_API_KEY}`,
+        },
+      },
+    )
+      .then((res) => res.json())
+      .then((data) => data.data);
+
+    if (!chatBot || !chatBot.isActivated) {
+      return;
+    }
 
     let answer = "";
 
