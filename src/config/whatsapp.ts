@@ -6,6 +6,11 @@ import makeWASocket, {
   fetchLatestBaileysVersion,
   useMultiFileAuthState,
 } from "@whiskeysockets/baileys";
+import {
+  containsAnyWord,
+  generateAnswerWithBotion,
+  generateAnswerWithGemini,
+} from "../utils";
 
 export async function connectToWhatsApp() {
   const { version, isLatest } = await fetchLatestBaileysVersion();
@@ -51,7 +56,6 @@ export async function connectToWhatsApp() {
         connectToWhatsApp();
       } else {
         connectToWhatsApp();
-        //sock.end(lastDisconnect?.error);
       }
     }
 
@@ -84,35 +88,12 @@ export async function connectToWhatsApp() {
     if (!messageText) return;
 
     console.log("=".repeat(100));
-
-    // console.log(JSON.stringify(messageContent, null, 2));
-
     console.log(`📱`, remoteJid);
     console.log(`🐵`, pushName);
     console.log(`💬`, messageText);
-
     console.log("=".repeat(100), "\n");
 
     if (
-      messageText.includes(
-        "Hola! 👋, confirmamos nuestra asistencia a su boda y estamos emocionados por compartir este día tan especial con ustedes !Gracias por la invitación!",
-      )
-    ) {
-      const response = `¡Hola! *${pushName}* 😊\n\n¡Muchas gracias por confirmar tu asistencia! Nos alegra mucho saber que nos acompañarán en este día tan especial.\n\nPara asegurarnos de tener todo listo, ¿Nos podrías confirmar tu nombre? Y de acuerdo a tus pases ¿Cuántas personas asistirán?\n\nDetalles del evento:\n\n- Ceremonia: Templo de San Agustín, 5:00 p.m.\n- Recepción: La Huerta, a partir de las 6:00 p.m.\n\n¡Gracias de nuevo por tu confirmación y nos vemos pronto!\n\nAquí está el enlace a la invitación digital: https://boda.edgarbenavides.dev/invitacion\n\nSaludos,\nLizbeth y Edgar.`;
-      await sock.sendMessage(
-        remoteJid,
-        {
-          text: response,
-        },
-        {
-          quoted: messageContent,
-        },
-      );
-
-      return;
-    }
-
-    /* if (
       containsAnyWord(messageText, [
         "hello",
         "hi",
@@ -123,21 +104,30 @@ export async function connectToWhatsApp() {
       ])
     ) {
       await sock.sendMessage(remoteJid, {
-        text: `Hola! ${pushName}, un gusto saludarte.\nMi nombre es EddBot y como asistente personal de Edgar Benavides. Estoy aqui para responder todas tus preguntas que tengas acerca de su experiencia y trabajo.\nAsi que no dudes en preguntarme.`,
+        text: `Hola! ${pushName}, un gusto saludarte.\n¿en que te puedo ayudar?`,
       });
 
       return;
     }
 
-    const messageIsQuestion = messageText.includes("?");
+    const provider = process.env.CHATBOT_PROVIDER?.toLowerCase() || "botion";
 
-    if (messageIsQuestion) {
-      console.log("Question:", messageText);
-      const { answer } = await generateAnswer(messageText);
+    let answer = "";
 
-      await sock.sendMessage(remoteJid, {
-        text: answer,
-      });
-    } */
+    await sock.sendPresenceUpdate("composing");
+
+    if (provider === "botion") {
+      answer = (await generateAnswerWithBotion(messageText)).answer;
+    }
+
+    if (provider === "gemini") {
+      answer = (await generateAnswerWithGemini(messageText)).answer;
+    }
+
+    await sock.sendPresenceUpdate("unavailable");
+
+    await sock.sendMessage(remoteJid, {
+      text: answer,
+    });
   });
 }
